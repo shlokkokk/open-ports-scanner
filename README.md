@@ -14,10 +14,11 @@ python scanner.py
 Open http://localhost:5000 and scan.
 
 One-liner Docker
-bash
-Copy
+
 docker build -t reaper .
 docker run -p 5000:5000 reaper
+
 Legal
 Only scan targets you own or have explicit permission to test.
+
 MIT © 2025 Shlok Shah

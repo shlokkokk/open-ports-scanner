@@ -72,29 +72,29 @@ document.addEventListener('mousemove',e=>{
 
 // scanner logic (unchanged URLs)
 let scanData={};
-async function scan(){
+async function scan(ev){
   const tgt=document.getElementById('tgt').value.trim();
-  if(!tgt){alert('Supply target');return;}
+  if(!tgt){alert('Enter hostname');return;}
   const o=document.getElementById('out');
   const gen=document.getElementById('genBtn');
-  o.textContent='Scanning 1-65535 (async)… this will take a while.\nPlease wait...\n';
+  o.textContent='Scanning 1-65535 (async) …';
   gen.style.display='none';
-  const res=await fetch('/scan',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({target:tgt})
-  });
+  const res=await fetch('/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:tgt})});
   const data=await res.json();
   if(data.error){o.textContent='Error: '+data.error;return;}
   scanData=data;
   let txt=`Target resolved: ${data.ip}\n\n`;
-  if(data.open.length===0){txt+='No open ports found. Rock-solid!';}
+  if(data.open.length===0){txt+='No open ports found.  Stay frosty.';}
   else{
-    txt+=`Open ports found: ${data.open.length}\n`;
-    txt+=data.open.join(', ')+'\n\nDetails:\n';
+    txt+=`Open ports found: ${data.open.length}\n\n`;
     for(const p of data.open){
-      txt+=`Port ${p}\n`;
-    }
+      const svc=data.service[p];
+     const atk=data.attack[p];
+     const fix=data.fix[p];
+     txt+=`Port ${p} (${svc})\n`;
+     txt+=`  Attack: ${atk}\n`;
+     txt+=`  Fix   : ${fix}\n\n`;
+}
   }
   o.textContent=txt;
   gen.style.display='inline-block';

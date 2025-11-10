@@ -37,7 +37,39 @@ async def full_scan(ip, max_tasks=500):
     return [p for p, ok in results if ok]
 
 # ---- vuln / fix lookup (same as before) ----
-VULN = {21: "FTP cleartext / anon login.", 22: "SSH brute-force / weak keys.", 23: "Telnet unencrypted.", 25: "SMTP open-relay risk.", 53: "DNS cache poisoning.", 80: "Web bugs, info leak.", 110: "POP3 cleartext.", 135: "Windows RPC exploits.", 139: "NetBIOS (SMBv1) attacks.", 143: "IMAP cleartext.", 443: "OK if TLS 1.3, else weak.", 993: "Secure IMAP – usually OK.", 995: "Secure POP – usually OK.", 1433: "MSSQL brute / leaks.", 1521: "Oracle TNS poison.", 1723: "PPTP broken crypto.", 3306: "MySQL exposed.", 3389: "RDP – BlueKeep, brute.", 5432: "PostgreSQL leaks.", 5900: "VNC no encryption.", 6379: "Redis unauth.", 8080: "Dev panel weak creds."}
+# pure service name
+SERVICE = {
+    21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP", 53: "DNS",
+    80: "HTTP", 110: "POP3", 135: "Windows RPC", 139: "NetBIOS",
+    143: "IMAP", 443: "HTTPS", 993: "IMAPS", 995: "POP3S",
+    1433: "MSSQL", 1521: "Oracle TNS", 1723: "PPTP", 3306: "MySQL",
+    3389: "RDP", 5432: "PostgreSQL", 5900: "VNC", 6379: "Redis", 8080: "HTTP-Alt"
+}
+ATTACK = {
+    21: "Anonymous upload / credential sniffing",
+    22: "Brute-force login / weak key abuse",
+    23: "Credential sniffing (cleartext)",
+    25: "Spam relay / header injection",
+    53: "Cache poisoning / DNS hijack",
+    80: "DoS, XSS, SQLi, data leak",
+    110: "Password sniffing",
+    135: "RPC exploits (BlueKeep-style)",
+    139: "SMBv1 ransomware (WannaCry)",
+    143: "Password sniffing",
+    443: "Downgrade to weak TLS, POODLE",
+    993: "Account lockout (brute)",
+    995: "Account lockout (brute)",
+    1433: "Data dump, privilege escalation",
+    1521: "TNS poison / data leak",
+    1723: "MS-CHAPv2 crack → domain creds",
+    3306: "Data dump, ransomware",
+    3389: "BlueKeep, brute-force → domain",
+    5432: "Data dump, privilege escalation",
+    5900: "Screen watch, key-log, brute",
+    6379: "Data dump, cache poison",
+    8080: "Dev panel takeover, data leak"
+}
+
 FIX = {21: "Use SFTP; disable anon.", 22: "Key-auth, no root, port-knock.", 23: "Disable; use SSH.", 25: "Auth+TLS, no relay.", 53: "Recursion only trusted.", 80: "Redirect HTTPS, patch.", 110: "Use POP3S.", 135: "Block at firewall.", 139: "Disable NetBIOS.", 143: "Use IMAPS.", 443: "Use TLS 1.3, HSTS.", 993: "Strong pw, 2FA.", 995: "Same as 993.", 1433: "VPN-only, strong sa pw.", 1521: "Encrypt traffic, ACL.", 1723: "Use WireGuard.", 3306: "Bind localhost / VPN.", 3389: "Gateway, NLA, latest.", 5432: "Hostssl, strong auth.", 5900: "Tunnel over SSH.", 6379: "Require auth, bind local.", 8080: "Firewall or reverse-proxy with auth."}
 
 def build_pdf(ip, open_ports):
@@ -52,14 +84,16 @@ def build_pdf(ip, open_ports):
     if not open_ports:
         story.append(Paragraph("No open ports found. Nice lockdown!", normal))
     else:
-        for port in open_ports:
-            svc = VULN.get(port, f"port-{port}")
-            vuln = VULN.get(port, "Investigate service manually.")
-            fix  = FIX.get(port, "Restrict to trusted IPs or disable.")
-            story.extend([Spacer(0.1*inch),
-                          Paragraph(f"<b>Port {port}</b> ({svc})", normal),
-                          Paragraph(f"<font color='orange'>Risk:</font> {vuln}", normal),
-                          Paragraph(f"<font color='red'>Fix:</font> {fix}", normal)])
+       for port in open_ports:
+             svc   = SERVICE.get(port, f"port-{port}")
+             atk   = ATTACK.get(port, "Investigate manually.")
+             fix   = FIX.get(port, "Restrict to trusted IPs or disable.")
+             story.extend([
+                Spacer(0.1*inch),
+                Paragraph(f"<b>Port {port}</b> ({svc})", normal),
+                Paragraph(f"<font color='orange'>Attack:</font> {atk}", normal),
+                Paragraph(f"<font color='red'>Fix:</font> {fix}", normal)
+    ])
     doc.build(story)
     buffer.seek(0)
     return buffer
@@ -88,7 +122,13 @@ def scan():
     asyncio.set_event_loop(loop)
     open_ports = loop.run_until_complete(full_scan(ip))
     loop.close()
-    return jsonify(ip=ip, open=open_ports)
+    return jsonify(
+    ip=ip,
+    open=open_ports,
+    service={p: SERVICE.get(p, f"port-{p}") for p in open_ports},
+    attack={p: ATTACK.get(p, "Investigate manually.") for p in open_ports},
+    fix={p: FIX.get(p, "Restrict to trusted IPs or disable.") for p in open_ports}
+)
 
 @app.route("/report", methods=["POST"])
 def report():

@@ -264,6 +264,10 @@ async function genPDF(){
   a.remove();
   window.URL.revokeObjectURL(url);
 }
+ // hit Enter to scan
+  document.getElementById('tgt').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') scan();
+  });
 </script>
 </body>
 </html>

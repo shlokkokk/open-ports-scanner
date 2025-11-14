@@ -233,11 +233,13 @@ async function scan(ev){
       const dsc = data.desc[p];
      const atk=data.attack[p];
      const fix=data.fix[p];
+     const sev = data.severity[p];
      txt += `Port ${p} (<b>${svc}</b>)\n`;
      txt += `  Full form: ${full}\n`;
      txt+=`  Description: ${dsc}\n`;
      txt+=`  Attack: ${atk}\n`;
-     txt+=`  Fix   : ${fix}\n\n`;
+     txt+=`  Fix   : ${fix}\n`;
+     txt += `  Severity: ${sev}\n\n`;
 }
   }
   o.innerHTML=txt;

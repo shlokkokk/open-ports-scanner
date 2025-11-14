@@ -2,3 +2,4 @@ Flask==3.0.3
 aiofiles==24.1.0
 reportlab==4.2.5
 gunicorn==23.0.0
+requests>=2.31

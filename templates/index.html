@@ -5,24 +5,164 @@
 <title>Ethical Port Scanner | Cyberpunk AF</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  :root{--bg:#000;--glow:#0f0;--accent:#f0f;}
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--glow);font-family:'Share Tech Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;cursor:none;}
-  #matrix{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;}
-  .scanline{position:fixed;top:0;left:0;width:100%;height:3px;background:var(--glow);opacity:.4;animation:scan 2s linear infinite;z-index:5;}
-  @keyframes scan{0%{transform:translateY(0);}100%{transform:translateY(100vh);}}
-  h1{font-size:3rem;text-shadow:0 0 5px var(--glow),0 0 10px var(--glow),0 0 20px var(--accent);animation:glitch 1.5s infinite;}
-  @keyframes glitch{0%,100%{text-shadow:0 0 5px var(--glow),0 0 10px var(--glow),0 0 20px var(--accent);}20%{text-shadow:0 0 5px var(--accent),0 0 10px var(--accent),0 0 20px var(--glow);}40%{text-shadow:0 0 5px var(--glow),0 0 10px var(--glow),0 0 20px var(--accent);}60%{text-shadow:0 0 5px var(--accent),0 0 10px var(--accent),0 0 20px var(--glow);}}
-  .box{background:#111a;border:1px solid var(--glow);padding:2.5rem;border-radius:12px;box-shadow:0 0 30px var(--glow);z-index:10;}
-  input,button{font-family:inherit;font-size:1rem;padding:.7rem 1.2rem;border-radius:6px;border:none;outline:none;transition:.2s;}
-  input{background:#000;color:var(--glow);border:1px solid var(--glow);width:435px;}
-  button{background:var(--glow);color:#000;margin-left:.5rem;cursor:pointer;}
-  button:hover{background:#0a0;box-shadow:0 0 15px var(--glow);}
-  #out{margin-top:1.5rem;max-width:700px;white-space:pre-wrap;font-size:.9rem;line-height:1.4;}
-  #genBtn{display:none;margin-top:1rem;}
-  /* mouse lightning */
-  .bolt{position:fixed;width:2px;height:2px;background:var(--glow);box-shadow:0 0 10px 3px var(--glow);pointer-events:none;z-index:9999;border-radius:50%;}
+/* ==========  CYBER-GREEN CORE  ========== */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg: #000;
+  --glow: #0f0;
+  --accent: #f0f;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--glow);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: none;
+}
+
+/* ==========  BACKGROUND FX  ========== */
+#matrix {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--glow);
+  opacity: 0.4;
+  animation: scan 2s linear infinite;
+  z-index: 5;
+}
+
+@keyframes scan {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(100vh); }
+}
+
+/* ==========  TITLE GLITCH  ========== */
+h1 {
+  font-size: 3rem;
+  text-shadow: 0 0 5px var(--glow), 0 0 10px var(--glow), 0 0 20px var(--accent);
+  animation: glitch 1.5s infinite;
+}
+
+@keyframes glitch {
+  0%, 100% { text-shadow: 0 0 5px var(--glow), 0 0 10px var(--glow), 0 0 20px var(--accent); }
+  20%      { text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 20px var(--glow); }
+  40%      { text-shadow: 0 0 5px var(--glow), 0 0 10px var(--glow), 0 0 20px var(--accent); }
+  60%      { text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 20px var(--glow); }
+}
+
+/* ==========  CARD & CONTROLS  ========== */
+.box {
+  background: #111a;
+  border: 1px solid var(--glow);
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 30px var(--glow);
+  z-index: 10;
+}
+
+input, button {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  transition: 0.2s;
+}
+
+input {
+  background: #000;
+  color: var(--glow);
+  border: 1px solid var(--glow);
+  width: 435px;
+}
+
+button {
+  background: var(--glow);
+  color: #000;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0a0;
+  box-shadow: 0 0 15px var(--glow);
+}
+
+/* ==========  OUTPUT BOX  ========== */
+#out {
+  margin-top: 1.5rem;
+  max-width: 700px;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  max-height: 60vh;
+  overflow-y: auto;
+  
+  /* neon cyber scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--glow) #000;
+}
+#out b { 
+  text-transform: uppercase; 
+}
+#out::-webkit-scrollbar {
+  width: 8px;
+}
+#out::-webkit-scrollbar-track {
+  background: #000;
+}
+#out::-webkit-scrollbar-thumb {
+  background: var(--glow);
+  border-radius: 4px;
+  box-shadow: 0 0 5px var(--glow);
+}
+#out::-webkit-scrollbar-thumb:hover {
+  background: #0a0;
+}
+
+/* ==========  MISC  ========== */
+#genBtn {
+  display: none;
+  margin-top: 1rem;
+}
+
+.bolt {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background: var(--glow);
+  box-shadow: 0 0 10px 3px var(--glow);
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+}
 </style>
 </head>
 <body>
@@ -89,14 +229,18 @@ async function scan(ev){
     txt+=`Open ports found: ${data.open.length}\n\n`;
     for(const p of data.open){
       const svc=data.service[p];
+      const full = data.full[p];
+      const dsc = data.desc[p];
      const atk=data.attack[p];
      const fix=data.fix[p];
-     txt+=`Port ${p} (${svc})\n`;
+     txt += `Port ${p} (<b>${svc}</b>)\n`;
+     txt += `  Full form: ${full}\n`;
+     txt+=`  Description: ${dsc}\n`;
      txt+=`  Attack: ${atk}\n`;
      txt+=`  Fix   : ${fix}\n\n`;
 }
   }
-  o.textContent=txt;
+  o.innerHTML=txt;
   gen.style.display='inline-block';
 }
 async function genPDF(){

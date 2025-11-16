@@ -17,18 +17,23 @@
 
 ## 🚀 About
 
-**OPEN-PORT REAPER** is a lightweight asynchronous TCP port scanner (ports 1–65535) with a clean Flask web interface and instant PDF reporting.  
-Designed for speed, simplicity, and easy deployment.
-
+**OPEN-PORT REAPER** is a lightweight asynchronous ethical port scanner that maps open ports, detects services, analyzes attack risks, and recommends security fixes - complete with real-time output and automated PDF reporting.
 ---
 
 ## ✨ Features
 
-- Fast asynchronous port scanning (concurrent checks)
-- Simple web UI (Flask)
-- Instant PDF export of scan results
-- CLI mode for quick scans (optional)
-- Docker-ready for easy deployment
+* **Full-Range Port Scanning (1–65535):** Fast asynchronous engine that scans all ports with high accuracy.
+* **Service Detection:** Automatically identifies common services (SSH, HTTP, FTP, custom ports, malware backdoors).
+* **Vulnerability Insights:** Each open port comes with attack risks, explanations, and real-world exploitation possibilities.
+* **Recommended Fixes:** Every detection includes actionable security hardening steps.
+* **Severity Tagging:** Ports are categorized by severity—Low, Medium, High, Critical.
+* **Clean Hacker-UI Dashboard:** Matrix-style terminal interface optimized for clarity and speed.
+* **Target Resolver:** Automatically resolves domain to IP before scanning.
+* **PDF Report Generator:** One-click export of beautifully formatted, professional security reports.
+* **Ethical by Design:** Built for cybersecurity learning, network auditing, and defensive analysis.
+* **Optimized for Students & Pentesters:** Simple enough for beginners, powerful enough for pros.
+* **Lightweight & Fast:** Uses async architecture to achieve high-speed scanning with minimal system load.
+* **Cross-Platform Support:** Works on Linux, Windows, macOS.
 
 ---
 

@@ -22,11 +22,19 @@ async def tcp_check(ip, port, timeout=1):
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(ip, port), timeout=timeout
         )
+
+        banner = ""
+        try:
+            data = await asyncio.wait_for(reader.read(200), timeout=0.3)
+            banner = data.decode(errors="ignore").strip()
+        except:
+            banner = ""       
+
         writer.close()
         await writer.wait_closed()
-        return port, True
+        return port, True, banner
     except Exception:
-        return port, False
+        return port, False, ""
 
 async def full_scan(ip, max_tasks=500):
     semaphore = asyncio.Semaphore(max_tasks)
@@ -35,9 +43,9 @@ async def full_scan(ip, max_tasks=500):
             return await tcp_check(ip, port)
     tasks = [sem_check(p) for p in TOP_PORTS]
     results = await asyncio.gather(*tasks)
-    return [p for p, ok in results if ok]
+    return {p: banner for (p, ok, banner) in results if ok}
 
-# ---- vuln / fix lookup (same as before) ----
+# vuln / fix lookup 
 # pure service name
 SERVICE = {
     7:"Echo", 19:"Chargen", 20:"FTP-Data", 21:"FTP", 22:"SSH",
@@ -1289,29 +1297,56 @@ FIX = {
     54311: "Secure BTC miner; restrict RPC access"
 }
 
-def build_pdf(ip, open_ports):
+def build_pdf(ip, open_ports, banners):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5 * inch)
     styles = getSampleStyleSheet()
     title = ParagraphStyle("title", fontSize=18, textColor=green, spaceAfter=12)
     normal = styles["Normal"]
-    story = [Paragraph("Ethical Port-Scan Report", title),
+    story = [Paragraph("<b><font size=20 color='green'>ETHICAL PORT-SCAN REPORT</font></b>", title),
              Paragraph(f"Target IP: <b>{ip}</b>", normal),
              Paragraph(f"Scan Date: {time.strftime('%Y-%m-%d %H:%M:%S')} UTC", normal)]
     if not open_ports:
         story.append(Paragraph("No open ports found. Nice lockdown!", normal))
     else:
        for port in open_ports:
-            name, desc = IANA.get(port, (f"Port-{port}", "No IANA entry"))
+            name = SERVICE.get(port, f"Port-{port}")
+            desc = DESC.get(port, "No description available.")
+
+            
+            if isinstance(desc, list):
+                desc = ", ".join(desc)
             atk   = ATTACK.get(port, "Investigate manually.")
             fix   = FIX.get(port, "Restrict to trusted IPs or disable.")
+            full_form = FULL.get(port, "Unknown")
+            severity  = SEVERITY.get(port, "Unknown")
+
             story.extend([
-            Spacer(0.1*inch),
-            Paragraph(f"<b>Port {port}</b> ({name})", normal),
-            Paragraph(f"<font color='orange'>Description:</font> {desc}", normal),
-            Paragraph(f"<font color='orange'>Attack:</font> {atk}", normal),
-            Paragraph(f"<font color='red'>Fix:</font> {fix}", normal)
-    ])
+                Spacer(0.2 * inch, 0.3 * inch),
+                Paragraph(f"<b><font size=14 color='green'>Port {port} — {name}</font></b>", normal),
+                Spacer(0.1 * inch, 0.12 * inch)
+            ])
+
+            banner_text = banners.get(str(port), "")
+            banner_text = banner_text.strip()
+            if banner_text:
+                story.append(
+                    Paragraph(f"<font color='green'>Banner:</font> {banner_text}", normal)
+                )
+
+            
+            story.extend([
+                Paragraph(f"<font color='cyan'>Full form:</font> {full_form}", normal), 
+                Spacer(0.1 * inch, 0.1 * inch),
+                Paragraph(f"<font color='orange'>Description:</font> {desc}", normal),
+                Spacer(0.1 * inch, 0.1 * inch),
+                Paragraph(f"<font color='orange'>Attack:</font> {atk}", normal),
+                Spacer(0.1 * inch, 0.1 * inch),
+                Paragraph(f"<font color='red'>Fix:</font> {fix}", normal),
+                Spacer(0.1 * inch, 0.1 * inch),
+                Paragraph(f"<font color='red'>Severity:</font> {severity}", normal),
+                story.append(Paragraph("<font color='green'>----------------------------------------------</font>", normal))
+            ])
     doc.build(story)
     buffer.seek(0)
     return buffer
@@ -1342,7 +1377,8 @@ def scan():
     loop.close()
     return jsonify(
     ip=ip,
-    open=open_ports,
+    open=list(open_ports.keys()),
+    banners=open_ports,
     service={p: SERVICE.get(p, f"port-{p}") for p in open_ports},
     full={p: FULL.get(p, "Network Service") for p in open_ports},
     desc={p: DESC.get(p, "Common network service") for p in open_ports}, 
@@ -1358,7 +1394,7 @@ def report():
     ports = data.get("open", [])
     if not ip:
         return jsonify(error="Missing data"), 400
-    pdf_buffer = build_pdf(ip, ports)
+    pdf_buffer = build_pdf(ip, ports, data.get("banners", {}))
     pdf_buffer.seek(0, io.SEEK_END)          # go to end
     if pdf_buffer.tell() == 0:               # 0 bytes → bug
         return jsonify(error="PDF generation failed"), 500

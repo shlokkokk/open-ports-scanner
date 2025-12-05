@@ -5,7 +5,7 @@
 <title>Ethical Port Scanner | Cyberpunk AF</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-/* ==========  CYBER-GREEN CORE  ========== */
+/*   CYBER-GREEN CORE   */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
@@ -35,7 +35,7 @@ body {
   cursor: none;
 }
 
-/* ==========  BACKGROUND FX  ========== */
+/*   BACKGROUND FX   */
 #matrix {
   position: fixed;
   top: 0;
@@ -62,7 +62,7 @@ body {
   100% { transform: translateY(100vh); }
 }
 
-/* ==========  TITLE GLITCH  ========== */
+/*   TITLE GLITCH   */
 h1 {
   font-size: 3rem;
   text-shadow: 0 0 5px var(--glow), 0 0 10px var(--glow), 0 0 20px var(--accent);
@@ -76,7 +76,7 @@ h1 {
   60%      { text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 20px var(--glow); }
 }
 
-/* ==========  CARD & CONTROLS  ========== */
+/*   CARD & CONTROLS   */
 .box {
   background: #111a;
   border: 1px solid var(--glow);
@@ -115,7 +115,7 @@ button:hover {
   box-shadow: 0 0 15px var(--glow);
 }
 
-/* ==========  OUTPUT BOX  ========== */
+/*   OUTPUT BOX   */
 #out {
   margin-top: 1.5rem;
   max-width: 700px;
@@ -147,7 +147,7 @@ button:hover {
   background: #0a0;
 }
 
-/* ==========  MISC  ========== */
+/*   MISC   */
 #genBtn {
   display: none;
   margin-top: 1rem;
@@ -235,6 +235,9 @@ async function scan(ev){
      const fix=data.fix[p];
      const sev = data.severity[p];
      txt += `Port ${p} (<b>${svc}</b>)\n`;
+     if (data.banners[p]) {
+    txt += `  Banner: ${data.banners[p]}\n`;
+    }
      txt += `  Full form: ${full}\n`;
      txt+=`  Description: ${dsc}\n`;
      txt+=`  Attack: ${atk}\n`;
@@ -246,11 +249,15 @@ async function scan(ev){
   gen.style.display='inline-block';
 }
 async function genPDF(){
-  const {ip,open}=scanData;
+  const { ip, open, banners } = scanData;
   const res=await fetch('/report',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ip,open})
+    body: JSON.stringify({
+        ip,
+        open,
+        banners: scanData.banners
+    })
   });
   const blob=await res.blob();
   // force correct MIME & download
